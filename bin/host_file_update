@@ -1,4 +1,4 @@
-#!/bin/sh -e
+#!/bin/bash -e
 ### BEGIN INIT INFO
 # Provides: host_file_update
 # Required-Start: $network
@@ -19,21 +19,48 @@ case "$1" in
       rm -f /tmp/detectdomain.$$
       rm -f /tmp/detectdcip.$$
       rm -f /tmp/detectdcdomain.$$
+      rm -f /tmp/detectrealm.$$
     fi
-    myHostName=$(cat /etc/hostname)
-    nmblookup __SAMBA__ | awk -F_ '{print $1}' >> /tmp/detectdcip.$$
-    DETECTDCIP=`cat /tmp/detectdcip.$$`
-    if [ "$DETECTDCIP" = "name_query failed to find name __SAMBA__" ]; then
-      DETECTIP=$(domainname)
-      if [ "$DETECTDCIP" = "(none)" ]; then
-        myFQDN=$myHostName
-      fi
+    myHostName=$(cat /etc/hostname | awk -F. '{print $1}')
+    realm discover >> /tmp/detectrealm.$$
+    DETECTDOM=$(cat /tmp/detectrealm.$$ | head -n 1 | awk -F: '{print $1}')
+    if [ "$DETECTDOM" = "" ]; then
+      myFQDN=$myHostName
+      # Lookup the current loopback IP Address and strip it out of the result
+      loaddr4=$(/sbin/ifconfig lo | grep 'inet '| cut -d: -f2 | awk '{ print $2}')
+      loaddr6=$(/sbin/ifconfig lo | grep 'inet6 ' | awk '{ print $2}')
+      # Lookup the current IP Address and strip it out of the result
+      ipaddr4=$(/sbin/ifconfig | grep 'inet '| grep -v '127.0.0.1' | cut -d: -f2 | awk '{ print $2}')
+      ipaddr6=$(/sbin/ifconfig | grep 'inet6 '| grep -v '::1' | awk '{ print $2}') 
+      # erase /etc/hosts and create a new one
+      rm -rf /etc/hosts
+      touch /etc/hosts
+      #  Add the loopback IP Address back current IP Address and HostName to /etc/hosts
+      cat > /etc/hosts << FOO
+$loaddr4 localhost localhost.localdomain
+$loaddr6 localhost localhost.localdomain ip6-localhost ip6-loopback
+
+fe00::0		ip6-localnet
+ff00::0		ip6-mcastprefix
+ff02::1		ip6-allnodes
+ff02::2		ip6-allrouters
+
+$ipaddr4 $myHostName ${myHostName^^}
+$ipaddr6 $myHostName ${myHostName^^}
+FOO
     else
-      realm discover $DETECTDCIP | head -n 1 >> /tmp/detectdcdomain.$$
+      nslookup -type=soa $DETECTDOM | head -n 1 | awk -FServer: '{print $2}' | awk '{print $1}' >> /tmp/detectdcip.$$
+      DETECTDCIP=`cat /tmp/detectdcip.$$ | head -n 1`
+      realm discover | head -n 1 >> /tmp/detectdcdomain.$$
       myDomainName=`cat /tmp/detectdcdomain.$$`
-      myFQDN=$myHostName.$myDomainName  
+      myFQDN=$myHostName.$myDomainName
+      DETECTDCFQDN="$(dig +short NS $DETECTDOM)"
+      DCNAME="$(echo $DETECTDCFQDN | awk -F. '{print $1}')"
+      UPDCNAME="${DCNAME^^}"
+      DCFQDN="${DETECTDCFQDN::-1}"
+      UPDCFQDN="${DCFQDN^^}"
     fi
-    echo "$myDomainName is being used as domain name"
+    echo "$myDomainName is being used as domain name for $myFQDN"
     domainname $myDomainName
     # Lookup the current loopback IP Address and strip it out of the result
     loaddr4=$(/sbin/ifconfig lo | grep 'inet '| cut -d: -f2 | awk '{ print $2}')
@@ -46,12 +73,18 @@ case "$1" in
     touch /etc/hosts
     #  Add the loopback IP Address back current IP Address and HostName to /etc/hosts
     cat > /etc/hosts << FOO
-    $loaddr4 localhost localhost.localdomain
-    $loaddr6 localhost localhost.localdomain ip6-localhost ip6-loopback
-    
-    $ipaddr4 $myFQDN $myHostName ${myFQDN^^} ${myHostName^^}
-    $ipaddr6 $myFQDN $myHostName ${myFQDN^^} ${myHostName^^}
-    FOO
+$loaddr4 localhost localhost.localdomain
+$loaddr6 localhost localhost.localdomain ip6-localhost ip6-loopback
+
+fe00::0		ip6-localnet
+ff00::0		ip6-mcastprefix
+ff02::1		ip6-allnodes
+
+$DETECTDCIP $DCFQDN $DCNAME $UPDCFQDN $UPDCNAME
+
+$ipaddr4 $myFQDN $myHostName ${myFQDN^^} ${myHostName^^}
+$ipaddr6 $myFQDN $myHostName ${myFQDN^^} ${myHostName^^}
+FOO
   exit 0
 ;;
   stop)
@@ -60,21 +93,48 @@ case "$1" in
       rm -f /tmp/detectdomain.$$
       rm -f /tmp/detectdcip.$$
       rm -f /tmp/detectdcdomain.$$
+      rm -f /tmp/detectrealm.$$
     fi
-    myHostName=$(cat /etc/hostname)
-    nmblookup __SAMBA__ | awk -F_ '{print $1}' >> /tmp/detectdcip.$$
-    DETECTDCIP=`cat /tmp/detectdcip.$$`
-    if [ "$DETECTDCIP" = "name_query failed to find name __SAMBA__" ]; then
-      DETECTIP=$(domainname)
-      if [ "$DETECTDCIP" = "(none)" ]; then
-        myFQDN=$myHostName
-      fi
+    myHostName=$(cat /etc/hostname | awk -F. '{print $1}')
+    realm discover >> /tmp/detectrealm.$$
+    DETECTDOM=$(cat /tmp/detectrealm.$$ | head -n 1 | awk -F: '{print $1}')
+    if [ "$DETECTDOM" = "" ]; then
+      myFQDN=$myHostName
+      # Lookup the current loopback IP Address and strip it out of the result
+      loaddr4=$(/sbin/ifconfig lo | grep 'inet '| cut -d: -f2 | awk '{ print $2}')
+      loaddr6=$(/sbin/ifconfig lo | grep 'inet6 ' | awk '{ print $2}')
+      # Lookup the current IP Address and strip it out of the result
+      ipaddr4=$(/sbin/ifconfig | grep 'inet '| grep -v '127.0.0.1' | cut -d: -f2 | awk '{ print $2}')
+      ipaddr6=$(/sbin/ifconfig | grep 'inet6 '| grep -v '::1' | awk '{ print $2}') 
+      # erase /etc/hosts and create a new one
+      rm -rf /etc/hosts
+      touch /etc/hosts
+      #  Add the loopback IP Address back current IP Address and HostName to /etc/hosts
+      cat > /etc/hosts << FOO
+$loaddr4 localhost localhost.localdomain
+$loaddr6 localhost localhost.localdomain ip6-localhost ip6-loopback
+
+fe00::0		ip6-localnet
+ff00::0		ip6-mcastprefix
+ff02::1		ip6-allnodes
+ff02::2		ip6-allrouters
+
+$ipaddr4 $myHostName ${myHostName^^}
+$ipaddr6 $myHostName ${myHostName^^}
+FOO
     else
-      realm discover $DETECTDCIP | head -n 1 >> /tmp/detectdcdomain.$$
+      nslookup -type=soa $DETECTDOM | head -n 1 | awk -FServer: '{print $2}' | awk '{print $1}' >> /tmp/detectdcip.$$
+      DETECTDCIP=`cat /tmp/detectdcip.$$ | head -n 1`
+      realm discover | head -n 1 >> /tmp/detectdcdomain.$$
       myDomainName=`cat /tmp/detectdcdomain.$$`
-      myFQDN=$myHostName.$myDomainName  
+      myFQDN=$myHostName.$myDomainName
+      DETECTDCFQDN="$(dig +short NS $DETECTDOM)"
+      DCNAME="$(echo $DETECTDCFQDN | awk -F. '{print $1}')"
+      UPDCNAME="${DCNAME^^}"
+      DCFQDN="${DETECTDCFQDN::-1}"
+      UPDCFQDN="${DCFQDN^^}"
     fi
-    echo "$myDomainName is being used as domain name"
+    echo "$myDomainName is being used as domain name for $myFQDN"
     domainname $myDomainName
     # Lookup the current loopback IP Address and strip it out of the result
     loaddr4=$(/sbin/ifconfig lo | grep 'inet '| cut -d: -f2 | awk '{ print $2}')
@@ -87,12 +147,18 @@ case "$1" in
     touch /etc/hosts
     #  Add the loopback IP Address back current IP Address and HostName to /etc/hosts
     cat > /etc/hosts << FOO
-    $loaddr4 localhost localhost.localdomain
-    $loaddr6 localhost localhost.localdomain ip6-localhost ip6-loopback
-    
-    $ipaddr4 $myFQDN $myHostName ${myFQDN^^} ${myHostName^^}
-    $ipaddr6 $myFQDN $myHostName ${myFQDN^^} ${myHostName^^}
-    FOO
+$loaddr4 localhost localhost.localdomain
+$loaddr6 localhost localhost.localdomain ip6-localhost ip6-loopback
+
+fe00::0		ip6-localnet
+ff00::0		ip6-mcastprefix
+ff02::1		ip6-allnodes
+
+$DETECTDCIP $DCFQDN $DCNAME $UPDCFQDN $UPDCNAME
+
+$ipaddr4 $myFQDN $myHostName ${myFQDN^^} ${myHostName^^}
+$ipaddr6 $myFQDN $myHostName ${myFQDN^^} ${myHostName^^}
+FOO
   exit 0
 ;;
   restart)
@@ -101,21 +167,48 @@ case "$1" in
       rm -f /tmp/detectdomain.$$
       rm -f /tmp/detectdcip.$$
       rm -f /tmp/detectdcdomain.$$
+      rm -f /tmp/detectrealm.$$
     fi
-    myHostName=$(cat /etc/hostname)
-    nmblookup __SAMBA__ | awk -F_ '{print $1}' >> /tmp/detectdcip.$$
-    DETECTDCIP=`cat /tmp/detectdcip.$$`
-    if [ "$DETECTDCIP" = "name_query failed to find name __SAMBA__" ]; then
-      DETECTIP=$(domainname)
-      if [ "$DETECTDCIP" = "(none)" ]; then
-        myFQDN=$myHostName
-      fi
+    myHostName=$(cat /etc/hostname | awk -F. '{print $1}')
+    realm discover >> /tmp/detectrealm.$$
+    DETECTDOM=$(cat /tmp/detectrealm.$$ | head -n 1 | awk -F: '{print $1}')
+    if [ "$DETECTDOM" = "" ]; then
+      myFQDN=$myHostName
+      # Lookup the current loopback IP Address and strip it out of the result
+      loaddr4=$(/sbin/ifconfig lo | grep 'inet '| cut -d: -f2 | awk '{ print $2}')
+      loaddr6=$(/sbin/ifconfig lo | grep 'inet6 ' | awk '{ print $2}')
+      # Lookup the current IP Address and strip it out of the result
+      ipaddr4=$(/sbin/ifconfig | grep 'inet '| grep -v '127.0.0.1' | cut -d: -f2 | awk '{ print $2}')
+      ipaddr6=$(/sbin/ifconfig | grep 'inet6 '| grep -v '::1' | awk '{ print $2}') 
+      # erase /etc/hosts and create a new one
+      rm -rf /etc/hosts
+      touch /etc/hosts
+      #  Add the loopback IP Address back current IP Address and HostName to /etc/hosts
+      cat > /etc/hosts << FOO
+$loaddr4 localhost localhost.localdomain
+$loaddr6 localhost localhost.localdomain ip6-localhost ip6-loopback
+
+fe00::0		ip6-localnet
+ff00::0		ip6-mcastprefix
+ff02::1		ip6-allnodes
+ff02::2		ip6-allrouters
+
+$ipaddr4 $myHostName ${myHostName^^}
+$ipaddr6 $myHostName ${myHostName^^}
+FOO
     else
-      realm discover $DETECTDCIP | head -n 1 >> /tmp/detectdcdomain.$$
+      nslookup -type=soa $DETECTDOM | head -n 1 | awk -FServer: '{print $2}' | awk '{print $1}' >> /tmp/detectdcip.$$
+      DETECTDCIP=`cat /tmp/detectdcip.$$ | head -n 1`
+      realm discover | head -n 1 >> /tmp/detectdcdomain.$$
       myDomainName=`cat /tmp/detectdcdomain.$$`
-      myFQDN=$myHostName.$myDomainName  
+      myFQDN=$myHostName.$myDomainName
+      DETECTDCFQDN="$(dig +short NS $DETECTDOM)"
+      DCNAME="$(echo $DETECTDCFQDN | awk -F. '{print $1}')"
+      UPDCNAME="${DCNAME^^}"
+      DCFQDN="${DETECTDCFQDN::-1}"
+      UPDCFQDN="${DCFQDN^^}"
     fi
-    echo "$myDomainName is being used as domain name"
+    echo "$myDomainName is being used as domain name for $myFQDN"
     domainname $myDomainName
     # Lookup the current loopback IP Address and strip it out of the result
     loaddr4=$(/sbin/ifconfig lo | grep 'inet '| cut -d: -f2 | awk '{ print $2}')
@@ -128,12 +221,18 @@ case "$1" in
     touch /etc/hosts
     #  Add the loopback IP Address back current IP Address and HostName to /etc/hosts
     cat > /etc/hosts << FOO
-    $loaddr4 localhost localhost.localdomain
-    $loaddr6 localhost localhost.localdomain ip6-localhost ip6-loopback
-    
-    $ipaddr4 $myFQDN $myHostName ${myFQDN^^} ${myHostName^^}
-    $ipaddr6 $myFQDN $myHostName ${myFQDN^^} ${myHostName^^}
-    FOO
+$loaddr4 localhost localhost.localdomain
+$loaddr6 localhost localhost.localdomain ip6-localhost ip6-loopback
+
+fe00::0		ip6-localnet
+ff00::0		ip6-mcastprefix
+ff02::1		ip6-allnodes
+
+$DETECTDCIP $DCFQDN $DCNAME $UPDCFQDN $UPDCNAME
+
+$ipaddr4 $myFQDN $myHostName ${myFQDN^^} ${myHostName^^}
+$ipaddr6 $myFQDN $myHostName ${myFQDN^^} ${myHostName^^}
+FOO
   exit 0
 ;;
     *)

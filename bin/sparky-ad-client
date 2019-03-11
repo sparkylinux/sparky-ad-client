@@ -14,10 +14,10 @@
 # checking to make sure the script is running with root privileges
 TESTROOT=`whoami`
 if [ "$TESTROOT" != "root" ]; then
-	echo "Must be run as root... Exiting..."
+	echo "$COMMON6"
 	exit 1
 else
-	echo "OK, running as root"
+	echo "$COMMON7"
 fi
 # register install file (so can detect already began install)
 touch /tmp/adclientstart.$$
@@ -25,17 +25,17 @@ export DEBIAN_FRONTEND=KDE
 
 # get default's locale file
 DEFLOCDIR="/usr/share/sparky/sparky-ad-client"
-if [ "`cat /etc/default/locale | grep fr`" != "" ]; then
-	export LOCAPT=fr && . $DEFLOCDIR/fr
-elif [ "`cat /etc/default/locale | grep it`" != "" ]; then
-	export LOCAPT=it && . $DEFLOCDIR/it
-elif [ "`cat /etc/default/locale | grep pl`" != "" ]; then
-	export LOCAPT=pl && . $DEFLOCDIR/pl
-elif [ "`cat /etc/default/locale | grep pt_BR`" != "" ]; then
-	export LOCAPT=pt-BR && . $DEFLOCDIR/pt_BR
-else
+#if [ "`cat /etc/default/locale | grep fr`" != "" ]; then
+#	export LOCAPT=fr && . $DEFLOCDIR/fr
+#elif [ "`cat /etc/default/locale | grep it`" != "" ]; then
+#	export LOCAPT=it && . $DEFLOCDIR/it
+#elif [ "`cat /etc/default/locale | grep pl`" != "" ]; then
+#	export LOCAPT=pl && . $DEFLOCDIR/pl
+#elif [ "`cat /etc/default/locale | grep pt_BR`" != "" ]; then
+#	export LOCAPT=pt-BR && . $DEFLOCDIR/pt_BR
+#else
 	export LOCAPT=en && . $DEFLOCDIR/en
-fi
+#fi
 
 # set options
 DIALOG=`which dialog`
@@ -52,12 +52,12 @@ MSGBOX="--msgbox "
 PASSWORD="--passwordbox "
 DSELECT="--dselect "
 BACKTITLE="--backtitle "
-TITLETEXT=$LOCAL7
+TITLETEXT=$COMMON1
 ARCH64=`uname -m | grep x86_64`
 ARCH32=`uname -m | grep 686`
 
 ### client ad installation log section ###
-echo "Creating install log file..."
+echo "$LOCAL3"
 if [ -f /var/log/sparky-ad-client.log ]; then
 	rm -f /var/log/sparky-ad-client.log
 fi
@@ -65,14 +65,14 @@ echo "AD Server Installer log" >> /var/log/sparky-ad-client.log
 echo "==============================================================" >> /var/log/sparky-ad-client.log
 
 if [ "$ARCH32" != "" ]; then
-	echo "32bit OS... OK, starting AD module installation..."
-	echo "32bit OS... OK, starting AD module installation..." >> /var/log/sparky-ad-client.log
+	echo "$COMMON4"
+	echo "$COMMON4" >> /var/log/sparky-ad-client.log
 elif [ "$ARCH64" != "" ]; then
-	echo "64bit OS... OK, starting AD module installation..."
-	echo "64bit OS... OK, starting AD module installation..." >> /var/log/sparky-ad-client.log
+	echo "$LOCAL5"
+	echo "$LOCAL5" >> /var/log/sparky-ad-client.log
 else
-	$DIALOG $TITLE"$TITLETEXT" $MSGBOX "$LOCAL110\n\n$LOCAL3" $HEIGHT $WIDTH
-	echo "No 64bit nor 32bit OS... exiting..." >> /var/log/sparky-ad-client.log
+	$DIALOG $TITLE"$TITLETEXT" $MSGBOX "$COMMON3\n\n$COMMON2" $HEIGHT $WIDTH
+	echo "$COMMON10" >> /var/log/sparky-ad-client.log
 	exit 1
 fi
 
@@ -81,31 +81,31 @@ SPARKYVERCHECK4=`cat /etc/apt/sources.list.d/sparky-stable.list | grep stable`
 DEBIANVERCHECK10=`cat /etc/apt/sources.list | grep -e testing -e buster`
 DEBIANVERCHECK9=`cat /etc/apt/sources.list | grep -e stable -e stretch`
 if [ "$SPARKYVERCHECK5" != "" ]; then
-	echo "$LOCAL4 $LOCAL3"
-	echo "It's Debian testing... exiting..." >> /var/log/sparky-ad-client.log
+	echo "$COMMON4 $COMMON2"
+	echo "It's Debian testing... $COMMON2.." >> /var/log/sparky-ad-client.log
 	exit 1
 elif [ "$DEBIANVERCHECK10" != "" ]; then
-	echo "$LOCAL4 $LOCAL3"
-	echo "It's Debian Buster testing... exiting..." >> /var/log/sparky-ad-client.log
+	echo "$COMMON4 $COMMON2"
+	echo "It's Debian Buster testing... $COMMON2.." >> /var/log/sparky-ad-client.log
 	exit 1
 fi
 
 # checking connection
-PINGTEST=$(ping -c 1 debian.org | grep [0-9])
-if [ "$PINGTEST" = "" ]; then
-	$DIALOG $TITLE"$TITLETEXT" $MSGBOX "$LOCAL1\n$LOCAL2\n\n$LOCAL3" $HEIGHT $WIDTH
-	echo "PING TEST=Internet connection not active, please connect to install from internet" >> /var/log/sparky-ad-client.log
-	exit 1
-else
-	echo "PING TEST=Internet connection OK"
-	echo "PING TEST=Internet connection OK" >> /var/log/sparky-ad-client.log
-fi
+#PINGTEST=$(ping -c 1 debian.org | grep [0-9])
+#if [ "$PINGTEST" = "" ]; then
+#	$DIALOG $TITLE"$COMMON5" $MSGBOX "$COMMON6\n$COMMON7\n\n$COMMON2" $HEIGHT $WIDTH
+#	echo "PING TEST=$COMMON6 $COMMON7" >> /var/log/sparky-ad-client.log
+#	exit 1
+#else
+#	echo "$COMMON8"
+#	echo "$COMMON8" >> /var/log/sparky-ad-client.log
+#fi
 
 ## Inform about this program and ask to continue or not
-$DIALOG $TITLE"$TITLETEXT" $YESNO "$LOCAL5\n$LOCAL6" $HEIGHT $WIDTH
+$DIALOG $TITLE"$TITLETEXT" $YESNO "$LOCAL7\n$COMMON10" $HEIGHT $WIDTH
 if [ "$?" != "0" ]; then
-	echo "Exiting sparky-ad-client installation by user."
-	echo "Exiting sparky-ad-client installation by user." >> /var/log/sparky-ad-client.log
+	echo "$COMMON9"
+	echo "$COMMON9" >> /var/log/sparky-ad-client.log
 	exit 1
 fi
 
@@ -126,13 +126,13 @@ else
 fi
 
 if [ "$PINGTEST" = "" ]; then
-	$DIALOG $TITLE"$TITLETEXT" $MSGBOX "$LOCAL1\n$LOCAL2\n\n$LOCAL3" $HEIGHT $WIDTH
-	echo "PING TEST=Internet connection failed, exiting."
-	echo "PING TEST=Internet connection failed, exiting." >> /var/log/sparky-ad-client.log
+	$DIALOG $TITLE"$TITLETEXT" $MSGBOX "$COMMON6\n$COMMON7\n\n$COMMON2" $HEIGHT $WIDTH
+	echo "PING TEST=$COMMON6 , $COMMON2"
+	echo "PING TEST=$COMMON6 , $COMMON2" >> /var/log/sparky-ad-client.log
 	exit 1
 else
-	echo "PING TEST=Internet connection OK"
-	echo "PING TEST=Internet connection OK" >> /var/log/sparky-ad-client.log
+	echo "$COMMON8"
+	echo "$COMMON8" >> /var/log/sparky-ad-client.log
 fi
 
 ### step 1: install pre-requisites ###
@@ -144,43 +144,43 @@ if [ "$ARCH64" != "" ]; then
 	if [ "$FOREIGN" = "" ]; then
 		dpkg --add-architecture i386
 	fi
-	DEBIAN_FRONTEND=noninteractive apt-get update
-	DEBIAN_FRONTEND=noninteractive apt-get install kde-config-sddm sparky-meta-client samba samba-common-bin ntp sddm-theme-debian-elarun libpam-winbind realmd sssd sssd-tools adcli krb5-user packagekit samba-common samba-common-bin samba-libs resolvconf playonlinux wine winetricks ffmpeg gimp sane-utils texlive-base-bin winbind wine-binfmt dosbox ttf-mscorefonts-installer command-not-found krb5-user ctdb tofrodos smbnetfs nmap openresolv krb5-admin-server krb5-kdc krb5-kdc-ldap krb5-kpropd libev4 libpam-krb5 firefox-esr-l10n-$DETECLANG -y
-	DEBIAN_FRONTEND=noninteractive apt-get update
-	update-command-not-found
+#	DEBIAN_FRONTEND=noninteractive apt-get update
+#	DEBIAN_FRONTEND=noninteractive apt-get install bluedevil pulseaudio-module-bluetooth tesseract-ocr kde-zeroconf kdepimlibs-kio-plugins kdesvn-kio-plugins kdiff3 kf5-kdepimlibs-kio-plugins kio-extras kio-extras-data kio-smpq kio-mtp klinkstatus komparator qml-module-org-kde-kio defconf-kde-data kaccounts-providers kaddressbook kalarm kalternatives kde-config-cddb kde-config-cron kde-config-touchpad kde-config-systemd kdenetwork-filesharing khotkeys xsettings-kde fonts-oxygen fusiondirectory-theme-oxygen gtk2-engines-oxygen kde-style-oxygen kde-style-oxygen-qt4 kde-style-oxygen-qt5 kwin-decoration-oxygen oxygen-icon-theme oxygen-sounds oxygencursors plasma-theme-oxygen hwinfo okular-extra-backends sane simple-scan xsane gscreenshot dirmngr libnss-winbind kdesudo kde-config-sddm wine32 wine64-tools wine64-preloader sparky-meta-client samba smb4k samba-common-bin ntp sddm-theme-debian-elarun libpam-winbind realmd sssd sssd-tools adcli krb5-user packagekit samba-common samba-common-bin samba-libs resolvconf playonlinux wine winetricks ffmpeg gimp sane-utils texlive-base-bin winbind wine-binfmt dosbox ttf-mscorefonts-installer command-not-found krb5-user ctdb tofrodos smbnetfs nmap krb5-admin-server krb5-kdc krb5-kdc-ldap krb5-kpropd libev4 libpam-krb5 firefox-esr-l10n-$DETECLANG -y
+#	DEBIAN_FRONTEND=noninteractive apt-get update
+#	update-command-not-found
 	SERVPACK="64bit"
 else
 	# 32 bit
-	DEBIAN_FRONTEND=noninteractive apt-get update
-	DEBIAN_FRONTEND=noninteractive apt-get install kde-config-sddm sparky-meta-client samba samba-common-bin ntp sddm-theme-debian-elarun libpam-winbind realmd sssd sssd-tools adcli krb5-user packagekit samba-common samba-common-bin samba-libs resolvconf playonlinux wine winetricks ffmpeg gimp sane-utils texlive-base-bin winbind wine-binfmt dosbox ttf-mscorefonts-installer command-not-found krb5-user ctdb tofrodos smbnetfs nmap openresolv krb5-admin-server krb5-kdc krb5-kdc-ldap krb5-kpropd libev4 libpam-krb5 -y
-	DEBIAN_FRONTEND=noninteractive apt-get update
-	update-command-not-found
+#	DEBIAN_FRONTEND=noninteractive apt-get update
+#	DEBIAN_FRONTEND=noninteractive apt-get install bluedevil pulseaudio-module-bluetooth tesseract-ocr kde-zeroconf kdepimlibs-kio-plugins kdesvn-kio-plugins kdiff3 kf5-kdepimlibs-kio-plugins kio-extras kio-extras-data kio-smpq kio-mtp klinkstatus komparator qml-module-org-kde-kio defconf-kde-data kaccounts-providers kaddressbook kalarm kalternatives kde-config-cddb kde-config-cron kde-config-touchpad kde-config-systemd kdenetwork-filesharing khotkeys xsettings-kde fonts-oxygen fusiondirectory-theme-oxygen gtk2-engines-oxygen kde-style-oxygen kde-style-oxygen-qt4 kde-style-oxygen-qt5 kwin-decoration-oxygen oxygen-icon-theme oxygen-sounds oxygencursors plasma-theme-oxygen hwinfo okular-extra-backends sane simple-scan xsane gscreenshot dirmngr libnss-winbind kdesudo kde-config-sddm wine32-tools wine32-preloader sparky-meta-client samba smb4k samba-common-bin ntp sddm-theme-debian-elarun libpam-winbind realmd sssd sssd-tools adcli krb5-user packagekit samba-common samba-common-bin samba-libs resolvconf playonlinux wine winetricks ffmpeg gimp sane-utils texlive-base-bin winbind wine-binfmt dosbox ttf-mscorefonts-installer command-not-found krb5-user ctdb tofrodos smbnetfs nmap krb5-admin-server krb5-kdc krb5-kdc-ldap krb5-kpropd libev4 libpam-krb5 -y
+#	DEBIAN_FRONTEND=noninteractive apt-get update
+#	update-command-not-found
 	SERVPACK="32bit"
 fi
 
-# check if the set of server apps was installed
-if [ -d /usr/share/doc/sparky-meta-client ]; then
-	echo "STEP1=$SERVPACK bit pre-requisites packages installed ok" >> /var/log/sparky-ad-client.log
-	echo "$SERVPACK pre-requisites packages were installed ok"
-else
-	echo "STEP1=$SERVPACK bit pre-requisites packages NOT installed" >> /var/log/sparky-ad-client.log
-	echo "$SERVPACK pre-requisites packages were NOT installed... Exiting..."
-	exit 1
-fi
+# check if the set of ad client apps was installed
+#if [ -d /usr/share/doc/sparky-meta-client ]; then
+#	echo "STEP1=$SERVPACK bit pre-requisites packages installed ok" >> /var/log/sparky-ad-client.log
+#	echo "$SERVPACK pre-requisites packages were installed ok"
+#else
+#	echo "STEP1=$SERVPACK bit pre-requisites packages NOT installed" >> /var/log/sparky-ad-client.log
+#	echo "$SERVPACK pre-requisites packages were NOT installed... $COMMON2.."
+#	exit 1
+#fi
 
 # check for acl capable file system at home directory
 touch /home/test.txt
 ACLCHK='setfacl -m g:adm:rwx /home/test.txt'
 if [ "$ACLCHK" != "" ]; then
 	echo "$ACLCHK"
-	echo "Your home folder partition do not have acl enabled, trying to enable..."
-	echo "STEP1=No home ACL enabled, try auto enable" >> /var/log/sparky-ad-client.log
+	echo "$LOCAL8"
+	echo "STEP1=$LOCAL8" >> /var/log/sparky-ad-client.log
 	# tune2fs -o acl,user_xattr /dev/
 	# mount /home -o remount,acl
 	# need to script something to add acl to fstab of home partition or root if no separated home
 else
-	echo "Home folder partition ACL support detected, continue install."
-	echo "STEP1=Already had home ACL enabled" >> /var/log/sparky-ad-client.log
+	echo "$LOCAL9"
+	echo "STEP1=$LOCAL9" >> /var/log/sparky-ad-client.log
 fi
 rm -rf /home/test.txt
 
@@ -188,16 +188,17 @@ rm -rf /home/test.txt
 
 ### step 4: networking ###
 
-ln -s /usr/bin/host_file_update /etc/init.d/host_file_update
-ln -s /usr/bin/host_file_update.service /etc/init.d/host_file_update.service
+#ln -s /usr/bin/host_file_update /etc/init.d/host_file_update
+#ln -s /usr/bin/host_file_update.service /etc/init.d/host_file_update.service
 
 chmod a+x /etc/init.d/host_file_update
 systemctl daemon-reload
-service host_file_update start
-update-rc.d host_file_update defaults
-update-rc.d host_file_update enable
+#service host_file_update start
+#update-rc.d host_file_update defaults
+#update-rc.d host_file_update enable
 
 # Ask for domain name, use actual if any or use the default "sparky"
+# Erase previous trys detection files if any
 if [ -f /tmp/detectdomain.$$ ]; then
 rm -f /tmp/detectdomain.$$
 rm -f /tmp/detectdcip.$$
@@ -205,48 +206,71 @@ rm -f /tmp/detectdcdomain.$$
 fi
 
 # Ask for host name or use the default;
-FILEHOSTNAME=`cat /etc/hostname`
+rm -f /tmp/myhname.$$
+FILEHOSTNAME=`cat /etc/hostname | awk -F. '{print $1}'`
 if [ "$FILEHOSTNAME" = "live" ]; then
-	echo "This is Live enviroment! cannot continue, exiting."
-	echo "STEP4=This is Live enviroment! cannot continue, exiting." >> /var/log/sparky-ad-server.log
+	echo "$COMMON11, $COMMON2"
+	echo "STEP4=$COMMON11, $COMMON2" >> /var/log/sparky-ad-client.log
 	exit 1
 elif [ "$FILEHOSTNAME" != "" ]; then
-	$DIALOG $TITLE="$TITLETEXT" $YESNO "$LOCAL108\n\n$FILEHOSTNAME" $HEIGHT $WIDTH
+	$DIALOG $TITLE="$TITLETEXT" $YESNO "$LOCAL10\n\n$FILEHOSTNAME" $HEIGHT $WIDTH
 	if [ "$?" = "0" ]; then
 		MYHOSTNAME="$FILEHOSTNAME"
 	else
-		$DIALOG $TITLE"$TITLETEXT" $ENTRY "$LOCAL108" $HEIGHT $WIDTH 2>/tmp/myhname.$$
+		$DIALOG $TITLE"$TITLETEXT" $ENTRY "$LOCAL11" $HEIGHT $WIDTH 2>/tmp/myhname.$$
 		MYHNAME1=`cat /tmp/myhname.$$`
 		MYHOSTNAME="$MYHNAME1"
 	fi
 fi
+HOSTNAME="$MYHOSTNAME"
+UPHOSTNAME="${MYHOSTNAME^^}"
+echo "HOSTNAME= $MYHOSTNAME" >> /var/log/sparky-ad-client.log
 sed -i '1 c\'$MYHOSTNAME'' /etc/hostname
 hostname -b -F /etc/hostname
 rm -f /tmp/myhname.$$
 
+###
+
+### Step 3 - Clean another install
+
+systemctl stop unscd
+systemctl stop smbd
+systemctl stop nmbd
+systemctl stop winbind
+systemctl stop samba
+systemctl stop ntp
+systemctl disable nmbd
+systemctl disable samba
+systemctl disable samba-ad-dc
+systemctl disable unscd
+rm /var/run/nscd/socket
+
+
 # Do AD auto detection
-nmblookup __SAMBA__ | awk -F_ '{print $1}' >> /tmp/detectdcip.$$
-DETECTDCIP=`cat /tmp/detectdcip.$$`
-realm discover $DETECTDCIP | head -n 1 >> /tmp/detectdcdomain.$$
-DETECTDCDOM=`cat /tmp/detectdcdomain.$$`
-echo $(dig -x $DETECTDCIP | awk -FSOA '{print $2}' | awk -F.$DETECTDCDOM '{print $1}') >> /tmp/detectdcname.$$
-DETECTDCNAME=`cat /tmp/detectdcname.$$`
-echo $DETECTDCDOM | awk -F. '{print $1}' >> /tmp/detectdomain.$$
-MYDNAME0=`cat /tmp/detectdomain.$$`
-if [ "$MYDNAME0" = "(none)" ]; then
-	$DIALOG $TITLE"$TITLETEXT" $ENTRY "$LOCAL119\n$LOCAL120" $HEIGHT $WIDTH 2>/tmp/mydname.$$
-	MYDNAME1=`cat /tmp/mydname.$$`
-	if [ "$MYDNAME1" != "" ]; then
-			MYDOMAINNAME="$MYDNAME1"
-		else
-			MYDOMAINNAME="sparky"
-	fi
-else
-	$DIALOG $TITLE="$TITLETEXT" $YESNO "$LOCAL106\n\n$MYDNAME0" $HEIGHT $WIDTH
+# Detect domain
+rm -f /tmp/detectdomain.$$
+rm -f /tmp/detectdcdomain.$$
+rm -f /tmp/detectdcip.$$
+rm -f /tmp/detectdcname.$$
+rm -f /tmp/mydname.$$
+rm -f /tmp/detecttld.$$
+rm -f /tmp/mytld.$$
+realm discover -v | realm list | head -n 1 >> /tmp/detectdcdomain.$$
+DETECTDCDOM=`cat /tmp/detectdcdomain.$$ | head -n 1`
+# If detected ask to use, if not ask for or use default
+if [ "$DETECTDCDOM" != "" ]; then
+	# Detect Domain controller ip
+	nslookup -type=soa $DETECTDCDOM | head -n 1 | awk -FServer: '{print $2}' >> /tmp/detectdcip.$$
+	DETECTDCIP=`cat /tmp/detectdcip.$$ | head -n 1`
+	echo $(dig +short NS $DETECTDCDOM | head -n 1 | awk -F. '{print $1}') >> /tmp/detectdcname.$$
+	DETECTDCNAME=`cat /tmp/detectdcname.$$`
+	echo $DETECTDCDOM | awk -F. '{print $1}' >> /tmp/detectdomain.$$
+	MYDNAME0=`cat /tmp/detectdomain.$$`
+	$DIALOG $TITLE="$COMMON15" $YESNO "$LOCAL14\n\n$MYDNAME0" $HEIGHT $WIDTH
 	if [ "$?" = "0" ]; then
 		MYDOMAINNAME="$MYDNAME0"
 	else
-		$DIALOG $TITLE"$TITLETEXT" $ENTRY "$LOCAL119\n$LOCAL120" $HEIGHT $WIDTH 2>/tmp/mydname.$$
+		$DIALOG $TITLE"$COMMON15" $ENTRY "$LOCAL12\n$LOCAL13" $HEIGHT $WIDTH 2>/tmp/mydname.$$
 		MYDNAME1=`cat /tmp/mydname.$$`
 		if [ "$MYDNAME1" != "" ]; then
 			MYDOMAINNAME="$MYDNAME1"
@@ -254,19 +278,43 @@ else
 			MYDOMAINNAME="sparky"
 		fi
 	fi
+else
+	# Try linux domain name detection
+	MYDNAME0=$(domainname)
+	if [ "$MYDNAME0" = "(none)" ]; then
+		$DIALOG $TITLE"$COMMON12" $ENTRY "$LOCAL12\n$LOCAL13" $HEIGHT $WIDTH 2>/tmp/mydname.$$
+		MYDNAME1=`cat /tmp/mydname.$$`
+		if [ "$MYDNAME1" != "" ]; then
+				MYDOMAINNAME="$MYDNAME1"
+			else
+				MYDOMAINNAME="sparky"
+		fi
+	else
+		$DIALOG $TITLE="$COMMON15" $YESNO "$LOCAL14\n\n$MYDNAME0" $HEIGHT $WIDTH
+		if [ "$?" = "0" ]; then
+			MYDOMAINNAME="$MYDNAME0"
+		else
+			$DIALOG $TITLE"$COMMON15" $ENTRY "$LOCAL12\n$LOCAL13" $HEIGHT $WIDTH 2>/tmp/mydname.$$
+			MYDNAME1=`cat /tmp/mydname.$$`
+			if [ "$MYDNAME1" != "" ]; then
+				MYDOMAINNAME="$MYDNAME1"
+			else
+				MYDOMAINNAME="sparky"
+			fi
+		fi
+	fi
 fi
-rm -f /tmp/detectdomain.$$
-rm -f /tmp/mydname.$$
+echo "MYDOMAINNAME = $MYDOMAINNAME" >> /var/log/sparky-ad-client.log
 
 # Check actual TLD, ask for one if not found or use the default; 
-echo $DETECTDCDOM | awk -F. '{print $2}' >>/tmp/detecttld.$$
-MYTLD=`cat /tmp/detecttld.$$`
-if [ "$MYTLD" != "" ]; then
-	$DIALOG $TITLE="$TITLETEXT" $YESNO "$LOCAL107\n\n$MYTLD" $HEIGHT $WIDTH
+if [ "$DETECTDCDOM" != "" ]; then
+	echo $DETECTDCDOM | awk -F. '{print $2}' >>/tmp/detecttld.$$
+	MYTLD=`cat /tmp/detecttld.$$`
+	$DIALOG $TITLE="$COMMON15" $YESNO "$LOCAL15\n\n$MYTLD" $HEIGHT $WIDTH
 	if [ "$?" = "0" ]; then
 		TLD="$MYTLD"
 	else
-		$DIALOG $TITLE"$TITLETEXT" $ENTRY "$LOCAL107" $HEIGHT $WIDTH 2>/tmp/mytld.$$
+		$DIALOG $TITLE"$COMMON13" $ENTRY "$LOCAL16\n\n$LOCAL17" $HEIGHT $WIDTH 2>/tmp/mytld.$$
 		MYTLD=`cat /tmp/mytld.$$`
 		if [ "$MYTLD" != "" ]; then
 			TLD="$MYTLD"
@@ -275,7 +323,7 @@ if [ "$MYTLD" != "" ]; then
 		fi
 	fi
 else
-	$DIALOG $TITLE"$TITLETEXT" $ENTRY "$LOCAL107" $HEIGHT $WIDTH 2>/tmp/mytld.$$
+	$DIALOG $TITLE"$COMMON13" $ENTRY "$LOCAL18\n\n$LOCAL17" $HEIGHT $WIDTH 2>/tmp/mytld.$$
 	MYTLD=`cat /tmp/mytld.$$`
 	if [ "$MYTLD" != "" ]; then
 		TLD="$MYTLD"
@@ -283,15 +331,21 @@ else
 		TLD="intranet"
 	fi
 fi
+echo "MYTLD = $MYTLD" >> /var/log/sparky-ad-client.log
+rm -f /tmp/detectdomain.$$
+rm -f /tmp/detectdcdomain.$$
+rm -f /tmp/detectdcip.$$
+rm -f /tmp/detectdcname.$$
+rm -f /tmp/mydname.$$
 rm -f /tmp/detecttld.$$
 rm -f /tmp/mytld.$$
 
 DOMAIN="$MYDOMAINNAME.$TLD"
 MYFQDN="$MYHOSTNAME.$MYDOMAINNAME.$TLD"
 DETECTDCFQDN="$DETECTDCNAME.$DETECTDCDOM"
-domainname "$DOMAIN"
+domainname $DOMAIN
 UPDOMAIN="${DOMAIN^^}"
-UPFQDN="${FQDN^^}"
+UPFQDN="${MYFQDN^^}"
 UPDCFQDN="${DETECTDCFQDN^^}"
 UPDCNAME="${DETECTDCNAME^^}"
 rm -f /etc/hostname
@@ -302,6 +356,8 @@ hostname -b -F /etc/hostname
 # detect local adress
 LOADDR4=$(/sbin/ifconfig lo | grep 'inet '| cut -d: -f2 | awk '{ print $2}')
 LOADDR6=$(/sbin/ifconfig lo | grep 'inet6 ' | awk '{ print $2}')
+IPADDR4=$(/sbin/ifconfig | grep 'inet '| grep -v '127.0.0.1' | cut -d: -f2 | awk '{ print $2}')
+IPADDR6=$(/sbin/ifconfig | grep 'inet6 '| grep -v '::1' | awk '{ print $2}') 
 # insert into hosts
 # backup /etc/hosts and create a new one
 if [ -f /etc/hosts ]; then
@@ -313,12 +369,15 @@ if [ -f /etc/hosts ]; then
 	echo "$LOADDR4 localhost.localdomain localhost" >> /etc/hosts
 	echo "$LOADDR6 localhost.localdomain localhost ip6-localhost ip6-loopback" >> /etc/hosts
 	echo " " >> /etc/hosts
-	echo "fe00::0         ip6-localnet" >> /etc/hosts
-	echo "ff00::0         ip6-mcastprefix" >> /etc/hosts
-	echo "ff02::1		  ip6-allnodes" >> /etc/hosts
-	echo "ff02::2  		  ip6-allrouters" >> /etc/hosts
+	echo "fe00::0		ip6-localnet" >> /etc/hosts
+	echo "ff00::0		ip6-mcastprefix" >> /etc/hosts
+	echo "ff02::1		ip6-allnodes" >> /etc/hosts
+	echo "ff02::2		ip6-allrouters" >> /etc/hosts
 	echo " " >> /etc/hosts
 	echo "$DETECTDCIP $DETECTDCFQDN $DETECTDCNAME $UPDCFQDN $UPDCNAME" >> /etc/hosts
+	echo " " >> /etc/hosts
+	echo "$IPADDR4 $MYFQDN $HOSTNAME $UPFQDN $UPHOSTNAME" >> /etc/hosts
+	echo "$IPADDR6 $MYFQDN $HOSTNAME $UPFQDN $UPHOSTNAME" >> /etc/hosts
 	# Change the way resolvconf works and lock the file
 	chattr -i /etc/resolv.conf
 	mv /etc/resolv.conf /etc/resolv.conf.original
@@ -328,26 +387,17 @@ if [ -f /etc/hosts ]; then
 	echo "nameserver $DETECTDCIP" >> /etc/resolv.conf
 	# echo "nameserver $DETECTDCIP6" >> /etc/resolv.conf
 else
-	echo "No hosts file found"
-	echo "STEP5=No hosts file found" >> /var/log/sparky-ad-server.log
+	echo "$COMMON14"
+	echo "STEP5=$COMMON14" >> /var/log/sparky-ad-client.log
 	exit 1
 fi
 # Lock changes on those files
-chattr +i /etc/hosts
+#chattr +i /etc/hosts
 rm /etc/resolv.conf.tail
 chattr -i /etc/resolv.conf.tail
 cat /etc/resolv.conf >> /etc/resolv.conf.tail
 chattr +i /etc/resolv.conf
 chattr +i /etc/resolv.conf.tail
-
-systemctl stop smbd
-systemctl stop nmbd
-systemctl stop winbind
-systemctl stop samba
-systemctl stop ntp
-systemctl disable nmbd
-systemctl disable samba
-systemctl disable samba-ad-dc
 
 # Backup Kerberos file
 if [ -f /etc/krb5.conf ]; then
@@ -367,29 +417,43 @@ for f in /var/lib/samba/private*.tdb; do mv "$f" "$(echo "$f" | sed s/tdb/TDBori
 for f in /var/lib/samba/private*.ldb; do mv "$f" "$(echo "$f" | sed s/ldb/LDBoriginal/)"; done
 for f in /var/run/samba/*.tdb; do mv "$f" "$(echo "$f" | sed s/tdb/TDBoriginal/)"; done
 for f in /var/run/samba/*.ldb; do mv "$f" "$(echo "$f" | sed s/ldb/LDBoriginal/)"; done
-### TO RESET EVERYTHING!! Make this step now and in case of problems to start over ###
+
+
+### TO RESET EVERYTHING!! samba and client configs ###
 rm -rfv /var/run/samba/*.tdb *.ldb
 rm -rfv /var/lib/samba/*.tdb *.ldb
 rm -rfv /var/cache/samba/*.tdb *.ldb
 rm -rfv /var/lib/samba/private/*.tdb *.ldb
 rm /var/lib/samba/private/krb5.conf
-rm /etc/samba/smb.conf
 
-echo "supersede domain-name \"$DOMAIN\";" >> /etc/dhcp/dhclient.conf
-echo "prepend domain-name \"$DOMAIN\";" >> /etc/dhcp/dhclient.conf
-echo "supersede domain-search \"$DOMAIN\";" >> /etc/dhcp/dhclient.conf
-echo "prepend domain-name \"$DOMAIN\";" >> /etc/dhcp/dhclient.conf
+#echo "supersede domain-name \"$DOMAIN\";" >> /etc/dhcp/dhclient.conf
+#echo "prepend domain-name \"$DOMAIN\";" >> /etc/dhcp/dhclient.conf
+#echo "supersede domain-search \"$DOMAIN\";" >> /etc/dhcp/dhclient.conf
+#echo "prepend domain-name \"$DOMAIN\";" >> /etc/dhcp/dhclient.conf
 
+rm -f $(find /etc/krb5.conf)
 cat > /etc/krb5.conf << FOO
 [logging]
         Default = FILE:/var/log/krb5.log
 
 [libdefaults]
         ticket_lifetime = 24000
+		renew_lifetime = 7d
         clock-skew = 300
-        default_realm = $DOMAIN
+        default_realm = $UPDOMAIN
         dns_lookup_realm = true
         dns_lookup_kdc = true
+
+[realms]
+$UPDOMAIN = {
+        kdc = $DETECTDCFQDN
+        admin_server = $DETECTDCFQDN
+        default_domain = $DOMAIN
+}
+
+[domain_realm]
+.$DOMAIN = $UPDOMAIN
+$DOMAIN = $UPDOMAIN
 FOO
 
 # Backup samba.conf file
@@ -398,16 +462,14 @@ if [ -f /etc/samba/smb.conf ]; then
 	mv /etc/samba/smb.conf /etc/samba/smb.conf.original
 	chattr +i /etc/samba/smb.conf.original
 fi
+rm -rf $(find /etc/samba/smb.conf)
 cat > /etc/samba/smb.conf << FOO
 [global]
         netbios name = ${MYHOSTNAME^^}
 		security = ads
         realm = $UPDOMAIN
-        password server = $DETECTDCIP
 		wins server = $DETECTDCIP
         workgroup = ${MYDOMAINNAME^^}
-        idmap uid = 10000-20000
-        idmap gid = 10000-20000
         winbind enum users = yes
         winbind enum groups = yes
         client use spnego = yes
@@ -424,8 +486,10 @@ cat > /etc/samba/smb.conf << FOO
 		printcap name = /dev/null
 		disable spoolss = yes
 FOO
+smbcontrol all reload-config
 
 # Configuration for the System Security Services Daemon (SSSD)
+rm -f $(find /etc/sssd/sssd.conf)
 cat > /etc/sssd/sssd.conf << FOO
 [nss]
 	filter_groups = root
@@ -454,18 +518,22 @@ cat > /etc/sssd/sssd.conf << FOO
 	chpass_provider = ad
 	sudo_provider = ad
 	ldap_id_mapping = true
-	fallback_homedir = /home/%u
+	fallback_homedir = /home/%d/%u
+	override_homedir = /home/%d/%u
+	enumerate = true
 	default_shell = /bin/bash
 	skel_dir = /etc/skel
-	use_fully_qualified_names = False
+	use_fully_qualified_names = true
 	ldap_schema = ad
 	dyndns_update = true
 	dyndns_refresh_interval = 43200
 	dyndns_update_ptr = true
 	dyndns_ttl = 3600
 FOO
-chmod 700 /etc/sssd/sssd.conf
+chown root:root /etc/sssd/sssd.conf
+chmod 600 /etc/sssd/sssd.conf
 
+rm -f $(find /etc/realmd.conf)
 cat > /etc/realmd.conf << FOO
 [active-directory]
 	os-name = SparkyLinux Debian
@@ -475,7 +543,7 @@ cat > /etc/realmd.conf << FOO
 	automatic-install = yes
 
 [users]
-	default-home = /home/%u
+	default-home = /home/%D/%U
 	default-shell = /bin/bash
 
 [$DOMAIN]
@@ -483,6 +551,7 @@ cat > /etc/realmd.conf << FOO
 	echo "fully-qualified-names = no
 FOO
 
+rm -f $(find /usr/share/pam-configs/$DOMAIN)
 cat > /usr/share/pam-configs/$DOMAIN << FOO
 Name: AD user home management
 Default: yes
@@ -495,27 +564,36 @@ Session:
 FOO
 #/usr/sbin/pam-auth-update --package
 
-cat > /etc/sudoers.d/ad-linux-admins/$DOMAIN << FOO
+rm -f $(find /etc/sudoers.d/$DOMAIN)
+cat > /etc/sudoers.d/$DOMAIN << FOO
 %Domain\ Admins ALL = (ALL) ALL
 FOO
 
 # Link libnss and reload
 if [ "$ARCH64" != "" ]; then
-	ln -s /lib/x86_64-linux-gnu/libnss_winbind.so.2 /lib/x86_64-linux-gnu/libnss_winbind.so
+	ARCH="x86_64-linux-gnu"
+	DETECTLINK="find /lib/x86_64-linux-gnu/libnss_winbind.so"
 elif [ "$ARCH32" != "" ]; then
-	ln -s /lib/i386-linux-gnu/libnss_winbind.so.2 /lib/i386-linux-gnu/libnss_winbind.so
+	ARCH="i386-linux-gnu"
+	DETECTLINK="find /lib/i386-linux-gnu/libnss_winbind.so"
 else
-	echo "your arch not supported... exiting..."
+	echo "$LOCAL6 $COMMON2"
 	exit 1
+fi
+if [ "$DETECTLINK" = "" ]; then
+	ln -s /lib/$ARCH/libnss_winbind.so.2 /lib/$ARCH/libnss_winbind.so
+else
+	echo "/lib/$ARCH/libnss_winbind.so already exists"
 fi
 ldconfig
 
 # Enable AD users to logon
 # Enable AD Users and Groups avaliable locally
 sed -i '27 c\password        [success=2 default=ignore]      pam_winbind.so try_first_pass' /etc/pam.d/common-account
+sed -i '28 c\account [default=ignore success=2 user_unknown=ignore]  pam_sss.so' /etc/pam.d/common-account
 
 mv /etc/ntpd.conf /etc/ntpd.conf.original
-rm -f /etc/ntpd.conf
+rm -f $(find /etc/ntpd.conf)
 touch /etc/ntpd.conf
 cat > /etc/ntpd.conf << FOO
 # Local clock. Note that is not the "localhost" address!
@@ -538,49 +616,38 @@ restrict 127.0.0.1
 # Enable the time sources only to only provide time to this host
 restrict $DETECTDCFQDN   mask 255.255.255.255    nomodify notrap nopeer noquery
 FOO
+
 #/usr/sbin/pam-auth-update --package
 ntpdate $DETECTDCFQDN
 systemctl start ntp
 
 # Add domain admins to sudoers
+rm -f $(find /etc/sudo.conf)
 echo "Set group_source dynamic" >> /etc/sudo.conf
 cat > /etc/sudoers.d/$DOMAIN << FOO
 %Domain\ Admins ALL = (ALL) ALL
 FOO
 
-systemctl stop unscd
-systemctl disable unscd
-rm /var/run/nscd/socket
-systemctl restart smbd
-systemctl enable smbd
-/etc/init.d/winbind stop
-/etc/init.d/winbind start
-
-systemctl unmask smbd.service
-systemctl unmask nmbd.service
-systemctl unmask winbind.service
-systemctl unmask samba.service
-systemctl enable smbd.service
-systemctl enable nmbd.service   
-systemctl enable winbind.service
-systemctl start smbd
-systemctl start nmbd   
-systemctl start winbind
-
-
-# set samba password
+# Aks domain administrator account and password
+rm -f /tmp/smbuser.$$
+$DIALOG $TITLE"$TITLETEXT" $ENTRY "$LOCAL19\n$LOCAL20" $HEIGHT $WIDTH 2>/tmp/smbuser.$$
+SMBUSER=`cat /tmp/smbuser.$$`
+if [ "$SMBUSER" != "" ]; then
+	SMBU="$SMBUSER"
+else
+	SMBU="Administrator"
+fi
 SMBPASS="1"
 SMBPASS2="2"
-
 while [ "$SMBPASS" != "$SMBPASS2" ]; do
-	$DIALOG $TITLE"$TITLETEXT" $PASSWORD "$LOCAL121" $HEIGHT $WIDTH 2>/tmp/smbpass.$$
+	$DIALOG $TITLE"$TITLETEXT" $PASSWORD "$LOCAL21" $HEIGHT $WIDTH 2>/tmp/smbpass.$$
 	if [ "$?" = "0" ]; then
 		SMBPASS=`cat /tmp/smbpass.$$`
 	else
 		exit 1
 	fi
 	rm /tmp/smbpass.$$
-	$DIALOG $TITLE"$TITLETEXT" $PASSWORD "$LOCAL122" $HEIGHT $WIDTH 2>/tmp/smbpass.$$
+	$DIALOG $TITLE"$TITLETEXT" $PASSWORD "$LOCAL22" $HEIGHT $WIDTH 2>/tmp/smbpass.$$
 	if [ "$?" = "0" ]; then
 		SMBPASS2=`cat /tmp/smbpass.$$`
 	else
@@ -588,19 +655,20 @@ while [ "$SMBPASS" != "$SMBPASS2" ]; do
 	fi
 	rm /tmp/smbpass.$$
 	if [ "$SMBPASS" != "$SMBPASS2" ]; then
-		$DIALOG $TITLE"$TITLETEXT" $MSGBOX "$LOCAL123" $HEIGHT $WIDTH
+		$DIALOG $TITLE"$TITLETEXT" $MSGBOX "$LOCAL23" $HEIGHT $WIDTH
 	fi
 	rm /tmp/smbpass.$$
 done
 
-echo "$SMBPASS" | realm join --user=Administrator --verbose $DOMAIN
-#echo "$SMBPASS" | /usr/bin/kinit "Administrator@$UPDOMAIN"
-#klist
-#net ads join -k
+#echo $SMBPASS | realm join --user=$SMBU --verbose $DOMAIN
+echo "$SMBPASS" | /usr/bin/kinit "$SMBU@$UPDOMAIN"
+klist
+net ads join -k
 #klist -k
 #kinit -k ${MYHOSTNAME^^}
+echo $SMBPASS | net ads keytab create -U $SMBU
 
-rm /etc/sddm.conf
+rm -rf $(find /etc/sddm.conf)
 cat > /etc/sddm.conf << FOO
 [Autologin]
 	Relogin=false
@@ -629,5 +697,26 @@ cat > /etc/sddm.conf << FOO
 	EnableHiDPI=true
 FOO
 
+# Add shared folder to user profiles
+
+# 
+
 systemctl restart realmd sssd
 systemctl enable sssd
+systemctl unmask smbd.service
+systemctl unmask nmbd.service
+systemctl unmask winbind.service
+systemctl unmask samba.service
+systemctl enable smbd.service
+systemctl enable nmbd.service   
+systemctl enable winbind.service
+systemctl start smbd
+systemctl start nmbd   
+systemctl start winbind
+
+# sed -i '7 c\passwd:         compat sss' /etc/nsswitch.conf
+# sed -i '8 c\group:          compat sss' /etc/nsswitch.conf
+sed -i '12 c\hosts:          files wins mdns4_minimal dns [NOTFOUND=return]' /etc/nsswitch.conf
+usermod -aG sudo $SMBU@$UPDOMAIN
+
+# END OF INSTALL
